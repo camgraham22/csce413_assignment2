@@ -40,6 +40,7 @@ def run_honeypot():
                 logger.info(f"Multiple connection attemps from {addr[0]}!")
         else:
             login_attemps[addr[0]] = 1
+        time.sleep(.5)
         client.send(b"SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5\r\n")
 
 
