@@ -19,7 +19,8 @@ TODO for students:
 
 import socket
 import sys
-
+import argparse
+from concurrent.futures import ThreadPoolExecutor, as_completed 
 
 def scan_port(target, port, timeout=1.0):
     """
@@ -39,12 +40,22 @@ def scan_port(target, port, timeout=1.0):
         # TODO: Try to connect to target:port
         # TODO: Close the socket
         # TODO: Return True if connection successful
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(timeout)
+        sock.connect((target, port))
+        print(get_banner(target, port, sock))
+        sock.close()
+        return True
 
         pass  # Remove this and implement
 
     except (socket.timeout, ConnectionRefusedError, OSError):
         return False
 
+def get_banner(target, port, socket):
+    socket.send(b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n")
+    banner = socket.recv(1024).decode().strip()
+    return banner
 
 def scan_range(target, start_port, end_port):
     """
@@ -60,18 +71,24 @@ def scan_range(target, start_port, end_port):
     """
     open_ports = []
 
-    print(f"[*] Scanning {target} from port {start_port} to {end_port}")
+    print(f"[*] Scanning {target} from portasfsdf {start_port} to {end_port}")
     print(f"[*] This may take a while...")
 
     # TODO: Implement the scanning logic
     # Hint: Loop through port range and call scan_port()
     # Hint: Consider using threading for better performance
 
-    for port in range(start_port, end_port + 1):
-        # TODO: Scan this port
-        # TODO: If open, add to open_ports list
-        # TODO: Print progress (optional)
-        pass  # Remove this and implement
+    with ThreadPoolExecutor(max_workers=100) as executor:
+        future_to_port = {executor.submit(scan_port, target, p): p for p in range(start_port, end_port + 1)}
+
+        for future in as_completed(future_to_port):
+            port = future_to_port[future]
+            is_open = future.result()
+            if is_open:
+                open_ports.append(port)
+                print(f"[*] Port {port}: OPEN")
+            # else:
+                # print(f"[*] Port {port}: CLOSED")
 
     return open_ports
 
@@ -89,11 +106,22 @@ def main():
         print("Example: python3 port_scanner_template.py 172.20.0.10")
         sys.exit(1)
 
-    target = sys.argv[1]
-    start_port = 1
-    end_port = 1024  # Scan first 1024 ports by default
+    # target = sys.argv[1]
+    # start_port = 1
+    # end_port = 1024  # Scan first 1024 ports by default
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--target")
+    parser.add_argument("--ports")
+
+    args = parser.parse_args()
+    target = args.target
+    ports = args.ports.split('-')
+    start_port = int(ports[0])
+    end_port = int(ports[1])
 
     print(f"[*] Starting port scan on {target}")
+
 
     open_ports = scan_range(target, start_port, end_port)
 

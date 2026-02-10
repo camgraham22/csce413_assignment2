@@ -1,0 +1,86 @@
+[
+    {
+        "Name": "csce413_assignment2_vulnerable_network",
+        "Id": "869e0ff8603759c6142595fab172853a807112e7b99909b3f9b5f47d76680707",
+        "Created": "2026-02-09T03:19:29.584040425Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv4": true,
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.20.0.0/16",
+                    "Gateway": "172.20.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "3a2eba623dda052e0c7da1bd46550863ffc15105aea8b85b4f19f97028a3fd73": {
+                "Name": "2_network_honeypot",
+                "EndpointID": "cff3b5773c21a648196a612fcc65ecd8a2745996546f7c850f730cc35dc6b75e",
+                "MacAddress": "52:b9:01:5f:c1:3f",
+                "IPv4Address": "172.20.0.30/16",
+                "IPv6Address": ""
+            },
+            "630dd77ceec057a4e51016779b818fcc3715481681e56d7c3ed2174a95dee40d": {
+                "Name": "2_network_port_knocking",
+                "EndpointID": "2cee594949d655fad3bea6c95c4009bd9dda9f3ef203473c631d879bac975667",
+                "MacAddress": "46:b6:e2:40:a6:a5",
+                "IPv4Address": "172.20.0.40/16",
+                "IPv6Address": ""
+            },
+            "6a2a0bc130c7f48d36dd97c49fbf4781cf10c0bcde38416ff21b66c59656bf67": {
+                "Name": "2_network_database",
+                "EndpointID": "186e3ce9ae6a02d66539e2128495124d3b72a81ed773247e0ce71b25c7d62de2",
+                "MacAddress": "72:4b:a8:89:48:ab",
+                "IPv4Address": "172.20.0.11/16",
+                "IPv6Address": ""
+            },
+            "7e610632b38cff3d30c4c6c5b763dee24f7c3177a8570153e1664f4184efff2f": {
+                "Name": "2_network_redis",
+                "EndpointID": "e7fc5f0122fc298325f96d47e9ade571f508802417b4c40fe48f0dfb02ae2eb5",
+                "MacAddress": "da:da:ca:91:4b:a6",
+                "IPv4Address": "172.20.0.22/16",
+                "IPv6Address": ""
+            },
+            "915a366167cad272e58f2a47813e6d011ba7be5075d133da1836449b3600f97f": {
+                "Name": "2_network_secret_api",
+                "EndpointID": "eca4320d55a9ecfec72d555a24dc369897db7637c75e4d201882d6736fd76bba",
+                "MacAddress": "5a:cf:ea:76:f9:27",
+                "IPv4Address": "172.20.0.21/16",
+                "IPv6Address": ""
+            },
+            "ca6f080c8588937c2593ce8a6de116647d520f902c88f137cd11d6e46501b4ce": {
+                "Name": "2_network_webapp",
+                "EndpointID": "48f28ddf0674448967f473578ea3b0eb2acc288238495317cd23a1baf0eb66c5",
+                "MacAddress": "0a:a7:d9:3d:a7:cd",
+                "IPv4Address": "172.20.0.10/16",
+                "IPv6Address": ""
+            },
+            "e1d3a0509192eb0441ca2edf86ef0fb0e160b5ac9bfa46675324f12d65daf885": {
+                "Name": "2_network_secret_ssh",
+                "EndpointID": "dcb3eb136761eed1f532693c2dd8d338aec2dc29b1192fe8e1cc6ad59c551266",
+                "MacAddress": "fe:b6:0c:fa:38:69",
+                "IPv4Address": "172.20.0.20/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {},
+        "Labels": {
+            "com.docker.compose.config-hash": "888e8b3b081f18261743f66d1aa2e405adf9b327c5faafeb1ecba00bb6d95a78",
+            "com.docker.compose.network": "vulnerable_network",
+            "com.docker.compose.project": "csce413_assignment2",
+            "com.docker.compose.version": "5.0.2"
+        }
+    }
+]

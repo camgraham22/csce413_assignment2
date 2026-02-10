@@ -4,6 +4,8 @@
 import logging
 import os
 import time
+import socket
+from logger import create_logger
 
 LOG_PATH = "/app/logs/honeypot.log"
 
@@ -18,12 +20,27 @@ def setup_logging():
 
 
 def run_honeypot():
-    logger = logging.getLogger("Honeypot")
+    logger = create_logger(LOG_PATH)    
     logger.info("Honeypot starter template running.")
-    logger.info("TODO: Implement protocol simulation, logging, and alerting.")
+    ip = "0.0.0.0"
+    port = 22
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind((ip, port))
+    server.listen(5)
+    login_attemps = {}
 
     while True:
-        time.sleep(60)
+        
+        client, addr = server.accept()
+        logger.info(f"Connection found. IP: {addr[0]}:{addr[1]}")
+        if addr[0] in login_attemps:
+            login_attemps[addr[0]] += 1
+            if login_attemps[addr[0]] > 3 :
+                logger.info(f"Multiple connection attemps from {addr[0]}!")
+        else:
+            login_attemps[addr[0]] = 1
+        client.send(b"SSH-2.0-OpenSSH_8.2p1 Ubuntu-4ubuntu0.5\r\n")
 
 
 if __name__ == "__main__":
