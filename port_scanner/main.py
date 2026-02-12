@@ -18,6 +18,7 @@ TODO for students:
 """
 
 import socket
+import time
 import sys
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed 
@@ -43,19 +44,24 @@ def scan_port(target, port, timeout=1.0):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
         sock.connect((target, port))
-        print(get_banner(target, port, sock))
+        banner = get_banner(sock)
         sock.close()
-        return True
+        return True, banner
 
         pass  # Remove this and implement
 
     except (socket.timeout, ConnectionRefusedError, OSError):
-        return False
+        return False, None
 
-def get_banner(target, port, socket):
-    socket.send(b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n")
-    banner = socket.recv(1024).decode().strip()
-    return banner
+def get_banner(socket):
+    try:
+        banner = socket.recv(1024).decode('utf-8', errors='ignore').strip()
+        if not banner:
+            socket.send(b"GET / HTTP/1.1\r\nHost: localhost\r\n\r\n")
+            banner = socket.recv(1024).decode().strip()
+            return banner if banner else None
+    except:
+        return None
 
 def scan_range(target, start_port, end_port):
     """
@@ -71,24 +77,39 @@ def scan_range(target, start_port, end_port):
     """
     open_ports = []
 
-    print(f"[*] Scanning {target} from portasfsdf {start_port} to {end_port}")
+    print(f"[*] Scanning {target} from port {start_port} to {end_port}")
     print(f"[*] This may take a while...")
+    start_time = time.time()
 
     # TODO: Implement the scanning logic
     # Hint: Loop through port range and call scan_port()
     # Hint: Consider using threading for better performance
 
+    total_ports_to_scan = end_port - start_port + 1
+    ports_already_scanned = 0
+    
     with ThreadPoolExecutor(max_workers=100) as executor:
         future_to_port = {executor.submit(scan_port, target, p): p for p in range(start_port, end_port + 1)}
 
         for future in as_completed(future_to_port):
             port = future_to_port[future]
-            is_open = future.result()
+            is_open, banner = future.result()
+            ports_already_scanned += 1
+            percent_scanned = (ports_already_scanned / total_ports_to_scan) * 100
             if is_open:
-                open_ports.append(port)
-                print(f"[*] Port {port}: OPEN")
-            # else:
-                # print(f"[*] Port {port}: CLOSED")
+                open_ports.append((port, banner))
+                if banner:
+                    banner = banner[:50]
+                else:
+                    banner = "No banner found."
+                print(f"\n[*] Port {port}: OPEN - Banner: {banner}")
+            sys.stdout.write(f'\rPercentage of ports scanned: {percent_scanned:.1f}%')
+            sys.stdout.flush()
+
+    print()
+    end_time = time.time()
+    total_time = end_time - start_time
+    print(f"Scan complete - Total Time: {total_time} seconds")
 
     return open_ports
 
@@ -113,23 +134,34 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--target")
     parser.add_argument("--ports")
+    parser.add_argument("--output")
 
     args = parser.parse_args()
     target = args.target
     ports = args.ports.split('-')
     start_port = int(ports[0])
     end_port = int(ports[1])
+    output = args.output
 
     print(f"[*] Starting port scan on {target}")
 
 
     open_ports = scan_range(target, start_port, end_port)
+    output_file = None
 
-    print(f"\n[+] Scan complete!")
-    print(f"[+] Found {len(open_ports)} open ports:")
-    for port in open_ports:
-        print(f"    Port {port}: open")
+    if output:
+        try:
+            output_file = open(output, "w")  
+        except IOError as error:
+            print(f"Error opening file: {error}")
 
+    print(f"\n[+] Scan complete!", file=output_file)
+    print(f"[+] Found {len(open_ports)} open ports:", file=output_file)
+    for port, banner in open_ports:
+        print(f"Port {port}: OPEN - Banner: {banner}", file=output_file)
+    
+    if output_file:
+        output_file.close()
 
 if __name__ == "__main__":
     main()
